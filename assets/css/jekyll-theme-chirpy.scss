@@ -1,0 +1,157 @@
+---
+---
+
+/* [1] Sass 모듈 로드 */
+@use 'sass:color';
+@use 'main{% if jekyll.environment == 'production' %}.bundle{% endif %}';
+
+/* [2] 사용자 설정값 (5가지 핵심 팔레트) */
+$u-main-bg:      {{ site.user_custom_theme.main_bg | default: '#f0f8ff' }};       /* 1. 메인 배경 */
+$u-sidebar-bg:   {{ site.user_custom_theme.sidebar_bg | default: '#2c3e50' }};    /* 2. 사이드바 배경 */
+$u-sidebar-text: {{ site.user_custom_theme.sidebar_text | default: '#ffffff' }};  /* 3. 사이드바 텍스트 */
+$u-active:       {{ site.user_custom_theme.active_color | default: '#00cd1b' }};  /* 4. 활성화(Active) */
+$u-card-bg:      {{ site.user_custom_theme.card_bg | default: '#ffffff' }};       /* 5. 카드 배경 */
+
+/* [3] 라이트 모드 오버라이딩 (5-Palette Grouping Logic) */
+html[data-mode="light"],
+html:not([data-mode]) {
+
+  /* =======================================================
+     [Group 1] 메인 배경 색상 (Main BG)
+     - 메인 배경, 마스크, 메인 보더, 톱바 배경(투명도 조절)
+     ======================================================= */
+  --main-bg: #{$u-main-bg};
+
+  /* 마스크: 배경색에 텍스트색(검정)을 살짝 섞어 어둡게 */
+  --mask-bg: #{color.mix(#000000, $u-main-bg, 20%)};
+
+  /* 메인 보더: 배경색보다 살짝 어둡게 (자연스러운 경계) */
+  --main-border-color: #{color.mix(#000000, $u-main-bg, 5%)};
+
+  /* [요청사항] 톱바: 메인 배경과 같고 투명도 70% */
+  --topbar-bg: #{color.change($u-main-bg, $alpha: 0.7)};
+  --topbar-wrapper-bg: #{$u-main-bg};
+
+
+  /* =======================================================
+     [Group 2] 사이드바 배경 색상 (Sidebar BG)
+     - 사이드바 배경, 테두리, 호버 효과
+     ======================================================= */
+  --sidebar-bg: #{$u-sidebar-bg};
+
+  /* 사이드바 테두리: 배경색보다 살짝(5%) 어둡게 */
+  --sidebar-border-color: #{color.mix(#000000, $u-sidebar-bg, 5%)};
+
+  /* [요청사항] 호버: 배경색보다 진하고 투명 비율로 자동 변경 */
+  /* 배경에 검정(그림자효과)을 5% 섞어 자연스럽게 진하게 만듦 */
+  --sidebar-hover-bg: #{color.mix(#000000, $u-sidebar-bg, 5%)};
+
+
+  /* =======================================================
+     [Group 3] 사이드바 텍스트 색상 (Sidebar Text)
+     - 타이틀, 서브타이틀, 라벨, 기본 텍스트, 버튼, 공유 버튼
+     - 비율에 따라 자연스럽게 파생
+     ======================================================= */
+  /* 타이틀: 사용자 선택 원본 */
+  --site-title-color: #{$u-sidebar-text};
+
+  /* 서브타이틀: 70% 불투명도 */
+  --site-subtitle-color: #{color.change($u-sidebar-text, $alpha: 0.7)};
+
+  /* 라벨: 타이틀과 비슷하게 */
+  --label-color: #{$u-sidebar-text};
+
+  /* 사이드바 목록 기본 텍스트: 60% 불투명도 */
+  --sidebar-muted-color: #{color.change($u-sidebar-text, $alpha: 0.6)};
+
+  /* 사이드바 하단 버튼: 배경은 카드색(밝음), 글자는 텍스트색(어두움) 활용하여 가독성 확보 */
+  --sidebar-btn-bg: #{$u-card-bg};
+  --sidebar-btn-color: #{color.change($u-sidebar-text, $alpha: 0.8)};
+
+  /* 공유 버튼: 기본 텍스트의 50% */
+  --btn-share-color: #{color.change($u-sidebar-text, $alpha: 0.5)};
+  /* 공유 버튼 호버: 활성화 색상(4번) 사용 */
+  --btn-share-hover-color: #{$u-active};
+
+
+  /* =======================================================
+     [Group 4] 텍스트 활성화 색상 (Active Color)
+     - 사이드바 활성 탭, TOC 하이라이트
+     ======================================================= */
+  --sidebar-active-color: #{$u-active};
+  --nav-cursor-color: #{$u-active};
+
+  /* [요청사항] 우측 사이드 목록 활성화 색상 = 왼쪽과 통일 */
+  --toc-highlight: #{$u-active};
+  --checkbox-checked-color: #{$u-active};
+
+  /* 링크 색상도 브랜드 컬러인 Active Color를 따르는 것이 자연스러움 */
+  --link-color: #{$u-active};
+  --link-underline-color: #{color.change($u-active, $alpha: 0.4)};
+
+
+  /* =======================================================
+     [Group 5] 카드 색상 (Card BG)
+     - 카드 배경, 카드 호버
+     ======================================================= */
+  --card-bg: #{$u-card-bg};
+
+  /* [요청사항] 카드 호버: 자연스럽게 설정 (배경보다 3% 어둡게) */
+  --card-hover-bg: #{color.mix(#000000, $u-card-bg, 3%)};
+  --card-shadow: #{color.change(#000000, $alpha: 0.05)} 0 2px 6px 0;
+
+
+  /* =======================================================
+     [Fixed] Common Colors (고정값 유지)
+     - 기본값을 유지하며 사용자가 변경하지 않음
+     ======================================================= */
+  --text-color: #34343c;
+  --text-muted-color: #757575;
+  --text-muted-highlight-color: inherit;
+  --heading-color: #2a2a2a;
+  --blockquote-border-color: #eeeeee;
+  --blockquote-text-color: #757575;
+  --button-bg: #ffffff;
+  --btn-border-color: #e9ecef;
+  --btn-backtotop-color: #686868;
+  --btn-backtotop-border-color: #f1f1f1;
+  --checkbox-color: #c5c5c5;
+  --img-bg: radial-gradient(circle, rgb(255 255 255) 0%, rgb(239 239 239) 100%);
+  --shimmer-bg: linear-gradient(90deg, rgba(250,250,250,0) 0%, rgba(232,230,230,1) 50%, rgba(250,250,250,0) 100%);
+
+  /* 검색창 등 기타 요소 */
+  --search-border-color: #f0f0f0;
+  --search-icon-color: #c2c6cc;
+  --input-focus-border-color: #b8b8b8;
+  --post-list-text-color: dimgray;
+  --btn-patinator-text-color: #555555;
+  --btn-paginator-hover-color: #{$u-card-bg};
+
+  /* 알림창 */
+  --prompt-text-color: rgba(46, 46, 46, 0.77);
+  --prompt-tip-bg: rgba(123, 247, 144, 0.2);
+  --prompt-tip-icon-color: #03b303;
+  --prompt-info-bg: #e1f5fe;
+  --prompt-info-icon-color: #0070cb;
+  --prompt-warning-bg: rgb(255, 243, 205);
+  --prompt-warning-icon-color: #ef9c03;
+  --prompt-danger-bg: rgba(248, 215, 218, 0.56);
+  --prompt-danger-icon-color: #df3c30;
+
+
+  /* Footer 배경: 메인 배경과 일치 */
+  footer {
+    background-color: #{$u-main-bg} !important;
+    border-top: 1px solid var(--main-border-color) !important;
+    p, a { color: var(--text-muted-color) !important; }
+  }
+}
+
+/* [4] 웹폰트 로드 */
+{% if site.user_custom_theme.font_import_url %}
+  @import url('{{ site.user_custom_theme.font_import_url }}');
+  :root {
+    --font-family-sans: {{ site.user_custom_theme.font_family_base | default: "sans-serif" }};
+    --font-family-heading: var(--font-family-sans);
+  }
+{% endif %}

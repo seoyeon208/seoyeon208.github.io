@@ -1,0 +1,121 @@
+---
+layout: compress
+---
+
+<!doctype html>
+
+{% include origin-type.html %}
+
+{% include lang.html %}
+
+{% if site.theme_mode %}
+  {% capture prefer_mode %}data-mode="{{ site.theme_mode }}"{% endcapture %}
+{% endif %}
+
+<!-- `site.alt_lang` can specify a language different from the UI -->
+<html lang="{{ page.lang | default: site.alt_lang | default: site.lang }}" {{ prefer_mode }}>
+  {% include head.html lang=lang %}
+
+  <body>
+    {% include sidebar.html lang=lang %}
+
+    <div id="main-wrapper" class="d-flex justify-content-center">
+      <div class="container d-flex flex-column px-xxl-5">
+        {% include topbar.html lang=lang %}
+
+        <div class="row flex-grow-1">
+          <main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4">
+            {% if layout.layout == 'default' %}
+              {% include refactor-content.html content=content lang=lang %}
+            {% else %}
+              {{ content }}
+            {% endif %}
+          </main>
+
+          <!-- panel -->
+          <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
+            <div class="access">
+              {% include_cached update-list.html lang=lang %}
+              {% include_cached trending-tags.html lang=lang %}
+            </div>
+
+            {% for _include in layout.panel_includes %}
+              {% assign _include_path = _include | append: '.html' %}
+              {% include {{ _include_path }} lang=lang %}
+            {% endfor %}
+          </aside>
+        </div>
+
+        <div class="row">
+          <!-- tail -->
+          <div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4">
+            {% for _include in layout.tail_includes %}
+              {% assign _include_path = _include | append: '.html' %}
+              {% include {{ _include_path }} lang=lang %}
+            {% endfor %}
+
+            {% include_cached footer.html lang=lang %}
+          </div>
+        </div>
+
+        {% include_cached search-results.html lang=lang %}
+      </div>
+
+      <aside aria-label="Scroll to Top">
+        <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow">
+          <i class="fas fa-angle-up"></i>
+        </button>
+      </aside>
+    </div>
+
+    <div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div>
+
+    {% if site.pwa.enabled %}
+      {% include_cached notification.html lang=lang %}
+    {% endif %}
+
+    <!-- Embedded scripts -->
+
+    {% for _include in layout.script_includes %}
+      {% assign _include_path = _include | append: '.html' %}
+      {% include {{ _include_path }} %}
+    {% endfor %}
+
+    {% include_cached search-loader.html lang=lang %}
+    <script>
+      (function() {
+        const hostname = window.location.hostname;
+
+        // [1] 배포 환경 감지
+        const isLocal = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+
+        // [2] API 주소 자동 전환 (배포되면 실서버, 로컬이면 로컬서버)
+        const apiBaseUrl = isLocal ? 'http://localhost:8000' : 'https://api.eggit.com';
+
+        // [3] 유저명 자동 추출 (핵심)
+        // - 배포 환경(github.io): 도메인 앞자리('user'.github.io)를 가져옴 -> 자동화 완료
+        // - 로컬 환경: 도메인이 없으므로 테스트용으로 'admin' 또는 'test_user' 등으로 고정
+        // ★ 로컬 테스트할 때만 아래 'test_user'를 본인 DB에 있는 걸로 바꾸세요. 배포 땐 무시됨.
+        let username = hostname.split('.')[0];
+        if (isLocal) {
+            username = 'bmc00-05'; // 로컬 테스트용 고정 ID
+        }
+
+        // [4] 세션 체크 및 전송
+        const today = new Date().toISOString().slice(0,10);
+        const sessionKey = `eggit_visited_${username}_${today}`;
+
+        if (sessionStorage.getItem(sessionKey)) return;
+
+        fetch(`${apiBaseUrl}/api/v1/dashboard/visit`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ repo_owner: username, is_test: isLocal }),
+          keepalive: true
+        }).then(res => {
+            if(res.ok) sessionStorage.setItem(sessionKey, 'true');
+        }).catch(e => console.error("Tracking Error:", e));
+      })();
+    </script>
+  </body>
+</html>
