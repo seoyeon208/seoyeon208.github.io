@@ -1,0 +1,13 @@
+title: seoyeon208.github.io
+description: 공통pjt
+remote_theme: just-the-docs/just-the-docs
+plugins:
+- jekyll-remote-theme
+url: https://seoyeon208.github.io
+baseurl: /seoyeon208.github.io
+aux_links:
+  seoyeon208.github.io on GitHub: https://github.com/seoyeon208/seoyeon208.github.io
+color_scheme: eggit_custom
+permalink: pretty
+search_enabled: true
+heading_anchors: true
